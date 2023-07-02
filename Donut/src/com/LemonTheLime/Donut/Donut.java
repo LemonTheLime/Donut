@@ -62,14 +62,17 @@ public class Donut extends Canvas implements Runnable {
 		
 	//create the all the points in the donut
 	private void createDonutPoints() {
+		int t = 96; //97 benchmark
+		int e = 00;
 		double r1 = 3;
 		double r2 = 6;
-		int n1 = 150; //to be tested
-		int n2 = 200; //to be tested
+		int n1 = t; //90; //to be tested
+		int n2 = 600 - t + e; //500; //to be tested
+		System.out.println("Total Points: " + (n1 * n2));
 		
 		
 		//donut shell
-		for(int i = 0; i < n1; i++) {
+		for(int i = 0; i < n1 / 1; i++) {
 			double m = r2 + r1 * Math.cos(i * 2 * Math.PI / n1);
 			double x;
 			double y = r1 * Math.sin(i * 2 * Math.PI / n1);
@@ -84,7 +87,7 @@ public class Donut extends Canvas implements Runnable {
 			}
 		}
 		//test
-		rotate(0, 0, 0);
+		rotate(0.9, 0, 0);
 
 		return;
 	}
@@ -126,7 +129,7 @@ public class Donut extends Canvas implements Runnable {
 	 * Rotate all the points
 	 */
 	private void update() {
-		rotate(0.01, 0, 0);
+		rotate(0.0, 0.03, 0.00);
 	}
 	
 	//render and draw the frame buffer
@@ -181,15 +184,14 @@ public class Donut extends Canvas implements Runnable {
 	
 	//render the plane list of 2d points to the screen and use z-buffers
 	private void renderPrePixels() {
-		int centerXOffset = (int)(RES_X / 2);
-		int centerYOffset = (int)(RES_Y / 2);
+
 		int luminance;
 		for(int i = 0; i < plane.size(); i++) {
 			//code
-			int x = plane.get(i).getScreenX() + centerXOffset;
-			int y = plane.get(i).getScreenY() + centerYOffset;
+			int x = plane.get(i).getScreenX();
+			int y = plane.get(i).getScreenY();
 			//GET ILLUMINATION HERE
-			points.get(i).updateSurfaceNormal();
+			//points.get(i).updateSurfaceNormal();
 			luminance = 0xffffff; //points.get(i).getLuminance();
 			luminance = points.get(i).getLuminance();
 			
@@ -197,6 +199,7 @@ public class Donut extends Canvas implements Runnable {
 			if(zBuffer[x + y * RES_X] == 0) {
 				//initial rendering
 				prePixels[x + y * RES_X] = luminance;
+				zBuffer[x + y * RES_X] = plane.get(i).getZDepth();
 			} else if(plane.get(i).getZDepth() > zBuffer[x + y * RES_X]) {
 				//greater zDepth
 				prePixels[x + y * RES_X] = luminance;
@@ -211,6 +214,7 @@ public class Donut extends Canvas implements Runnable {
 			points.get(i).rotateX(x);
 			points.get(i).rotateY(y);
 			points.get(i).rotateZ(z);
+			points.get(i).updateSurfaceNormal();
 
 		}
 	}
@@ -264,6 +268,7 @@ public class Donut extends Canvas implements Runnable {
 			this.xr = xr;
 			this.yr = yr;
 			this.zr = zr;
+			updateSurfaceNormal();
 		}
 		
 		//set the surfaceNormal vector
@@ -273,16 +278,20 @@ public class Donut extends Canvas implements Runnable {
 		
 		//get the hexadecimal grey luminance
 		public int getLuminance() {
-			//dot product between 0 - 1
-			double product = surfaceNormal.x * lightVector.x +
-					surfaceNormal.y * lightVector.y +
-					surfaceNormal.z * lightVector.z;
-			return getHexColor(product);
+			//dot product between -1 to 1
+			double product = surfaceNormal.getX() * lightVector.getX() +
+					surfaceNormal.getY() * lightVector.getY() +
+					surfaceNormal.getZ() * lightVector.getZ();
+			if(product < 0) {
+				return getHexColor(product);
+			} else {
+				return 0;
+			}
 		}
 		
 		//get the hex color from a double -1 to 1
 		private int getHexColor(double product) {
-			String v = Integer.toHexString((int)((product + 1) * 128));
+			String v = Integer.toHexString((int)((-product) * 256));
 			if(v.length() == 1) {
 				v = "0" + v;
 			}
@@ -347,11 +356,13 @@ public class Donut extends Canvas implements Runnable {
 		
 		//get x
 		public int getScreenX() {
-			return (int)(x * RES_X / WIDTH);
+			int centerXOffset = (int)(RES_X / 2);
+			return (int)(x * RES_X / WIDTH) + centerXOffset;
 		}
 		//get y
 		public int getScreenY() {
-			return (int)(y * RES_Y / HEIGHT);
+			int centerYOffset = (int)(RES_Y / 2);
+			return centerYOffset - (int)(y * RES_Y / HEIGHT);
 		}
 		//get zDepth
 		public double getZDepth() {
@@ -371,6 +382,19 @@ public class Donut extends Canvas implements Runnable {
 			this.x = x / s;
 			this.y = y / s;
 			this.z = z / s;
+		}
+		
+		//get x
+		public double getX() {
+			return x;
+		}
+		//get y
+		public double getY() {
+			return y;
+		}
+		//get z
+		public double getZ() {
+			return z;
 		}
 	}
 
