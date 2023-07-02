@@ -24,7 +24,7 @@ public class Donut extends Canvas implements Runnable {
 	//STATIC FIELDS
 	public static final int WIDTH = 16; //width of the virtual screen
 	public static final int HEIGHT = 9; //height of the virtual screen
-	public static final int SCALE = 4; //160 x 90 resolution
+	public static final int SCALE = 2; //160 x 90 resolution
 	public static final int RES_X = 640 / SCALE; //screen's pixel resolution
 	public static final int RES_Y = 360 / SCALE; //screen's pixel resolution
 	public static String title = "Donut";
@@ -43,7 +43,7 @@ public class Donut extends Canvas implements Runnable {
 	private double focalLength;
 	private double cameraDistance;
 	private double[] zBuffer = new double[RES_X * RES_Y];
-	private Vector3D lightVector = new Vector3D(0, -1, 0);
+	private Vector3D lightVector = new Vector3D(0, -1, 1);
 	
 	//CONSTRUCTOR
 	public Donut() {
@@ -61,13 +61,14 @@ public class Donut extends Canvas implements Runnable {
 	}
 		
 	//create the all the points in the donut
+	/* Benchmark
+	 * n1 = 96, n2 = 504, 48384
+	 */
 	private void createDonutPoints() {
-		int t = 96; //97 benchmark
-		int e = 00;
-		double r1 = 3;
-		double r2 = 6;
-		int n1 = t; //90; //to be tested
-		int n2 = 600 - t + e; //500; //to be tested
+		double r1 = 2.5;
+		double r2 = 5;
+		int n1 = 250;
+		int n2 = 500;
 		System.out.println("Total Points: " + (n1 * n2));
 		
 		
